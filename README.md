@@ -5,13 +5,13 @@ Modified Organism Screening by Enrichment
 
 Loosely based on the Debode paper:
 
-1- Quality trimming (fastp)
-2- Align reads to reference genomes of big 6 (bwa?)
-3- Get unaligned reads
-4- Make contigs (Spades?)
-5- Find elements in contigs (BLAST)
-6- Count reads in contigs (per found elements? Per contig?)
-7- Compare host reads / transgene reads
+1. Quality trimming (fastp)
+2. Align reads to reference genomes of big 6 (bwa?)
+3. Get unaligned reads
+4. Make contigs (Spades?)
+5. Find elements in contigs (BLAST)
+6. Count reads in contigs (per found elements? Per contig?)
+7. Compare host reads / transgene reads
 
 ## Ideas for future dev
 
