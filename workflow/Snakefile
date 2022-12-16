@@ -1,0 +1,97 @@
+import os
+import shutil
+from snakemake.utils import min_version
+from snakemake.utils import validate
+
+
+# Settings --------------------------------------------------------------------
+
+min_version("6.3.0")
+
+shell.executable("bash")
+
+
+configfile: os.path.join(workflow.basedir, "..", ".tests", "config", "config.yaml")
+
+
+# Validating samples in rules/common
+
+
+workdir: config["workdir"]
+
+
+# report: "report/workflow.rst"
+
+
+# Input rules ------------------------------------------------------------------
+
+
+include: "rules/common.smk"
+
+
+rule all:
+    input:
+        # trimming
+        expand("{sample}/trimmed/{sample}.html", sample=samples.index),
+        # host mapping
+        expand("{sample}/host_mapping/{sample}_aln.sam", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_flagstats.tsv", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_mapstats.tsv", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_unmapstats.tsv", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_read_per_org.tsv", sample=samples.index),
+        # panel mapping
+        expand("{sample}/panel_mapping/{sample}_aln.sam", sample=samples.index),
+        expand("{sample}/panel_mapping/{sample}_mapped.sam", sample=samples.index),
+        expand("{sample}/panel_mapping/{sample}_mapstats.tsv", sample=samples.index),
+        expand("{sample}/panel_mapping/{sample}_flagstats.tsv" , sample=samples.index),
+        # assembly
+        expand("{sample}/assembly/{sample}_merged_reads.sam", sample=samples.index),
+        expand("{sample}/assembly/spades/scaffolds.fasta", sample=samples.index),
+        expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
+        # blast
+        expand("{sample}/blast/{sample}_blast.tsv" , sample=samples.index),
+        # expand( , sample=samples.index),
+
+
+# Includes --------------------------------------------------------------------
+
+
+include: "rules/trimming.smk"
+include: "rules/host_mapping.smk"
+include: "rules/panel_mapping.smk"
+include: "rules/contigs.smk"
+include: "rules/blast.smk"
+
+
+# Workflow --------------------------------------------------------------------
+
+
+onstart:
+    print(f"\nYou are using MOOSE version: {version}")
+    with open(pipe_log, "a") as f:
+        f.write(f"[{get_local_time()}]: Pipeline started\n")
+
+
+onsuccess:
+    try:
+        for logfile in os.listdir(".snakemake/log/"):
+            shutil.move(os.path.join(".snakemake/log", logfile), "logs")
+        shutil.rmtree(".snakemake", ignore_errors=True)
+    except:
+        # if not executing .snakemake from workdir,
+        # the log file will be in execution directory
+        # as far as I know, there is now way to access this form here
+        pass
+    print("\nWorkflow finished, no error")
+    with open(pipe_log, "a") as f:
+        f.write(f"[{get_local_time()}]: Pipeline succesfully finished\n")
+
+
+onerror:
+    print(
+        f"\nAn error occured, please consider filing an bug report."
+        f"\n"
+        f"\nIssue tracker: https://github.com/CVUA-RRW/MOOSE/issues"
+    )
+    with open(pipe_log, "a") as f:
+        f.write(f"[{get_local_time()}]: Pipeline stopped on error\n")

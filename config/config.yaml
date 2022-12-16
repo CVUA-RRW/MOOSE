@@ -1,0 +1,39 @@
+workdir: /home/debian/NGS/dev/GMO/test
+samples: /home/debian/NGS/dev/GMO/fastq/samples.tsv
+threads_sample: 8 # quite critical for mapping. RAM footprint is big (30Gb per sample?) so maximize CPU usage by making one sample at a time. 
+
+# genomes: /home/debian/NGS/dev/GMO/references/genomes.tsv
+indexed_ref: /home/debian/NGS/dev/GMO/references/merged_refs.fa
+# panel as blast db and indexed for bwa
+panel: /home/debian/NGS/dev/GMO/panel/gmo_feed_panel.fa
+
+
+# Trimming parameters
+
+read_length_required: 50
+qualified_quality_phred: 15
+qctrim_window_size: 4
+qctrim_mean_quality: 30
+# UMI/MBC detection (Agilent only)
+umi: True
+umi_loc: per_read 
+umi_len: 3
+
+# Mapping parameters
+bwa_d: 100
+bwa_r: 1.5
+bwa_A: 1
+bwa_B: 4
+bwa_O: 6
+bwa_E: 1
+bwa_L: 5
+bwa_U: 9
+
+# Contigs parameters
+# TODO kmer specification or default to blank
+memory: 16
+temp: /tmp/spades/
+
+# BLAST parameters
+blast_id: 90
+blast_cov: 80
