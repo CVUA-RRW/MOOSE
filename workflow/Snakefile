@@ -46,8 +46,10 @@ rule all:
         expand("{sample}/panel_mapping/{sample}_flagstats.tsv" , sample=samples.index),
         # assembly
         expand("{sample}/assembly/{sample}_merged_reads.sam", sample=samples.index),
-        expand("{sample}/assembly/spades/scaffolds.fasta", sample=samples.index),
-        expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
+        expand("{sample}/assembly/denovo/scaffolds.fasta", sample=samples.index),
+        expand("{sample}/assembly/denovo/quast/report.tsv", sample=samples.index),
+        expand("{sample}/assembly/saute/contigs.fasta", sample=samples.index),
+        expand("{sample}/assembly/saute_all/contigs.fasta", sample=samples.index),
         # blast
         expand("{sample}/blast/{sample}_blast.tsv" , sample=samples.index),
         # expand( , sample=samples.index),

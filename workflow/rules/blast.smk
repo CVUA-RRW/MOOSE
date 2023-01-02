@@ -3,7 +3,7 @@ shell.executable("bash")
 
 rule blast_scaffolds:
     input:
-        scaffold="{sample}/assembly/spades/scaffolds.fasta",
+        scaffold="{sample}/assembly/denovo/scaffolds.fasta",
     output:
         blast="{sample}/blast/{sample}_blast.tsv",
     params:
@@ -28,5 +28,4 @@ rule blast_scaffolds:
             -num_threads {threads}
         
         sed -i '1 i\query_id\tsubject_id\tsubjectlength\tquery_start\tquery_end\tsubject_start\tsubject_end\tbitscore\tlength\tidentity\tmismatch' {output.blast}
-            
         """

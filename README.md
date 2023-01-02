@@ -7,11 +7,8 @@ Loosely based on the Debode paper:
 
 1. Quality trimming (fastp)
 2. Align reads to reference genomes of big 6 (bwa)
-3. Get unaligned reads
-2b. Align reads to panel
-3b. Get all reads where at least one mate maps
-4a. Merge all reads
-4b. Make contigs (Spades)
+3. Extract RPKM values for each host
+4. reference alignement to elements (SAUTE) + polishing (GFA connector ?)
 5. Find elements in contigs (BLAST)
 6. Count reads in contigs (per found elements? Per contig?)
 7. Compare host reads / transgene reads
@@ -22,13 +19,15 @@ Loosely based on the Debode paper:
 - perform samtools ops on bam
 - change hacky seq counts to idxstats
 - convert counts to rpkm
+- Clean up contig methods, keep only saute
+- Clean up unneeded read mappping
+- Add contig polishing
+- Add read counting on contigs (RPKM)
 
 ## Ideas for future dev
 
 - Compare bwa to simple kraken?
 - If bwa upgrade to bwa2
-- Test other assemblers (mira/masurca)
-- Assemble multiple contigs sources (CISA?)
 - Contig Blast viewer
 - Automated event detection (API to BCH/Euginius)?
 
@@ -36,7 +35,7 @@ Loosely based on the Debode paper:
 
 ### BWA reference indexing:
 
-1-Get assmblies from e.g. Genbank (wget or use ncbi browser)
+1-Get assemblies from e.g. Genbank (wget or use ncbi browser)
 
 2- concatenate asemblies:
 
@@ -52,6 +51,7 @@ bwa index merged_refs.fa
 ```
 
 Then use merged_refs.fa as a reference
+Same thing for the panel
 
 ### BLAST database for panel elements:
 

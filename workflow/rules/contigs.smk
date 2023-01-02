@@ -33,11 +33,11 @@ rule create_contigs:
         paired2="{sample}/assembly/{sample}_pair2.fastq",
         unpaired="{sample}/assembly/{sample}_unpaired.fastq",
     output:
-        spades_dir=directory("{sample}/assembly/spades/"),
-        contigs="{sample}/assembly/spades/contigs.fasta",
-        scaffold="{sample}/assembly/spades/scaffolds.fasta",
+        spades_dir=directory("{sample}/assembly/denovo/"),
+        contigs="{sample}/assembly/denovo/contigs.fasta",
+        scaffold="{sample}/assembly/denovo/scaffolds.fasta",
     message:
-        "Assembling reads for {wildcards.sample}"
+        "Assembling filtered reads for {wildcards.sample} with skesa"
     params:
         memory=config['memory'],
         temp=config['temp'],
@@ -46,7 +46,7 @@ rule create_contigs:
     threads:
         config['threads_sample']
     log:
-        "logs/{sample}/assembly.log"
+        "logs/{sample}/assembly_denovo.log"
     shell:
         """
         spades.py -o {output.spades_dir} \
@@ -58,18 +58,69 @@ rule create_contigs:
 
 rule contigs_qc:
     input:
-        contigs="{sample}/assembly/spades/contigs.fasta",
+        contigs="{sample}/assembly/denovo/contigs.fasta",
     output:
-        quast_dir=directory("{sample}/assembly/quast/"),
-        report="{sample}/assembly/quast/report.tsv",
+        quast_dir=directory("{sample}/assembly/denovo/quast/"),
+        report="{sample}/assembly/denovo/quast/report.tsv",
     message:
         "Quality control of {wildcards.sample} assembly"
     conda:
         "../envs/quast.yaml"
     log:
-        "logs/{sample}/assembly_qc.log"
+        "logs/{sample}/assembly_denovo_qc.log"
     shell:
         """
         quast.py --output-dir {output.quast_dir} {input.contigs} &> {log}
         """
 
+
+rule create_contigs_saute:
+    input:
+        paired1="{sample}/assembly/{sample}_pair1.fastq",
+        paired2="{sample}/assembly/{sample}_pair2.fastq",
+    output:
+        gfa="{sample}/assembly/saute/assembly_graph.gfa",
+        contigs="{sample}/assembly/saute/contigs.fasta",
+    message:
+        "Assembling filtered reads for {wildcards.sample} with saute"
+    params:
+        panel=config['panel'],
+    threads:
+        config['threads_sample']
+    conda:
+        "../envs/saute.yaml"
+    log:
+        "logs/{sample}/assembly_saute.log"
+    shell:
+        """
+        saute --cores {threads} \
+            --gfa {output.gfa} --reads {input.paired1},{input.paired2} \
+            --targets {params.panel} --all_variants {output.contigs} \
+            --vector_percent 1 --extend_ends &> {log}
+        """
+
+
+rule create_contigs_saute_all_reads:
+    input:
+        r1="{sample}/trimmed/{sample}_R1.fastq",
+        r2="{sample}/trimmed/{sample}_R2.fastq",
+    output:
+        gfa="{sample}/assembly/saute_all/assembly_graph.gfa",
+        contigs="{sample}/assembly/saute_all/contigs.fasta",
+    message:
+        "Assembling all reads for {wildcards.sample} with saute"
+    params:
+        panel=config['panel'],
+    threads:
+        config['threads_sample']
+    conda:
+        "../envs/saute.yaml"
+    log:
+        "logs/{sample}/assembly_saute_all.log"
+    shell:
+        """
+        saute --cores {threads} \
+            --gfa {output.gfa} --reads {input.r1},{input.r2} \
+            --targets {params.panel} --all_variants {output.contigs} \
+            --vector_percent 1 --extend_ends &> {log}
+        """
