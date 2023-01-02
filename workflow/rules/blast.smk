@@ -3,7 +3,7 @@ shell.executable("bash")
 
 rule blast_scaffolds:
     input:
-        scaffold="{sample}/assembly/denovo/scaffolds.fasta",
+        contigs="{sample}/assembly/assembly_graph.gfa",
     output:
         blast="{sample}/blast/{sample}_blast.tsv",
     params:
@@ -13,7 +13,7 @@ rule blast_scaffolds:
     threads:
         config['threads_sample']
     message:
-        "Aligning scaffold to panel for {wildcards.sample}"
+        "Aligning contigs to panel for {wildcards.sample}"
     conda:
         "../envs/blast.yaml"
     log:
@@ -22,7 +22,7 @@ rule blast_scaffolds:
         """
         exec 2> {log}
         
-        blastn -query {input.scaffold} -out {output.blast} -db {params.panel} \
+        blastn -query {input.contigs} -out {output.blast} -db {params.panel} \
             -task megablast \
             -outfmt "6 qseqid sseqid slen qstart qend sstart send bitscore length pident mismatch " \
             -num_threads {threads}

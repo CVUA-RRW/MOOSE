@@ -39,17 +39,10 @@ rule all:
         expand("{sample}/host_mapping/{sample}_mapstats.tsv", sample=samples.index),
         expand("{sample}/host_mapping/{sample}_unmapstats.tsv", sample=samples.index),
         expand("{sample}/host_mapping/{sample}_read_per_org.tsv", sample=samples.index),
-        # panel mapping
-        expand("{sample}/panel_mapping/{sample}_aln.sam", sample=samples.index),
-        expand("{sample}/panel_mapping/{sample}_mapped.sam", sample=samples.index),
-        expand("{sample}/panel_mapping/{sample}_mapstats.tsv", sample=samples.index),
-        expand("{sample}/panel_mapping/{sample}_flagstats.tsv" , sample=samples.index),
         # assembly
-        expand("{sample}/assembly/{sample}_merged_reads.sam", sample=samples.index),
-        expand("{sample}/assembly/denovo/scaffolds.fasta", sample=samples.index),
-        expand("{sample}/assembly/denovo/quast/report.tsv", sample=samples.index),
-        expand("{sample}/assembly/saute/contigs.fasta", sample=samples.index),
-        expand("{sample}/assembly/saute_all/contigs.fasta", sample=samples.index),
+        expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
+        expand("{sample}/assembly/contigs.fasta", sample=samples.index),
+        expand("{sample}/assembly/saute_all/assembly_graph_connected.gfa", sample=samples.index),
         # blast
         expand("{sample}/blast/{sample}_blast.tsv" , sample=samples.index),
         # expand( , sample=samples.index),
@@ -60,7 +53,6 @@ rule all:
 
 include: "rules/trimming.smk"
 include: "rules/host_mapping.smk"
-include: "rules/panel_mapping.smk"
 include: "rules/contigs.smk"
 include: "rules/blast.smk"
 
