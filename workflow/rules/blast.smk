@@ -3,13 +3,11 @@ shell.executable("bash")
 
 rule blast_scaffolds:
     input:
-        contigs="{sample}/assembly/assembly_graph.gfa",
+        contigs="{sample}/assembly/contigs.fasta",
     output:
         blast="{sample}/blast/{sample}_blast.tsv",
     params:
         panel=config['panel'],
-        blast_id=config['blast_id'],
-        blast_cov=config['blast_cov'],
     threads:
         config['threads_sample']
     message:

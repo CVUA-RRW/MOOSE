@@ -9,14 +9,6 @@ rule map_reads_host:
         aln="{sample}/host_mapping/{sample}_aln.sam",
     params:
         refs=config["indexed_ref"],
-        diag=config['bwa_d'],
-        reseed=config['bwa_r'],
-        A=config['bwa_A'],
-        B=config['bwa_B'],
-        O=config['bwa_O'],
-        E=config['bwa_E'],
-        L=config['bwa_L'],
-        U=config['bwa_U'],
     threads:
         config['threads_sample']
     message:
@@ -28,11 +20,7 @@ rule map_reads_host:
     shell:
         """
         exec 2> {log}
-        # -C option results in error in samtools. Need to check how to take care of UMI.
         bwa mem -t {threads} \
-            -d {params.diag} -r {params.reseed} \
-            -A {params.A} -B {params.B} -O {params.O} \
-            -E {params.E} -L {params.L} -U {params.U} \
             {params.refs} {input.r1} {input.r2} > {output.aln}
         """
 

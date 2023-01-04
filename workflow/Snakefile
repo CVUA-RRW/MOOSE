@@ -42,7 +42,7 @@ rule all:
         # assembly
         expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
         expand("{sample}/assembly/contigs.fasta", sample=samples.index),
-        expand("{sample}/assembly/saute_all/assembly_graph_connected.gfa", sample=samples.index),
+        expand("{sample}/assembly/assembly_graph_connected.gfa", sample=samples.index),
         # blast
         expand("{sample}/blast/{sample}_blast.tsv" , sample=samples.index),
         # expand( , sample=samples.index),
