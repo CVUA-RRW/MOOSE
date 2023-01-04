@@ -34,17 +34,20 @@ rule all:
         # trimming
         expand("{sample}/trimmed/{sample}.html", sample=samples.index),
         # host mapping
-        expand("{sample}/host_mapping/{sample}_aln.sam", sample=samples.index),
-        expand("{sample}/host_mapping/{sample}_flagstats.tsv", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_aln.bam", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_hosts_coverage.tsv", sample=samples.index),
         expand("{sample}/host_mapping/{sample}_mapstats.tsv", sample=samples.index),
-        expand("{sample}/host_mapping/{sample}_unmapstats.tsv", sample=samples.index),
-        expand("{sample}/host_mapping/{sample}_read_per_org.tsv", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_flagstats.tsv", sample=samples.index),
+        expand("{sample}/host_mapping/{sample}_rpkm.tsv", sample=samples.index),
         # assembly
         expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
         expand("{sample}/assembly/contigs.fasta", sample=samples.index),
         expand("{sample}/assembly/assembly_graph_connected.gfa", sample=samples.index),
         # blast
         expand("{sample}/blast/{sample}_blast.tsv" , sample=samples.index),
+        # coverage
+        expand("{sample}/assembly/{sample}_aln.bam", sample=samples.index),
+        # expand("{sample}/host_mapping/{sample}_flagstats.tsv", sample=samples.index),
         # expand( , sample=samples.index),
 
 
@@ -55,6 +58,7 @@ include: "rules/trimming.smk"
 include: "rules/host_mapping.smk"
 include: "rules/contigs.smk"
 include: "rules/blast.smk"
+include: "rules/coverage.smk"
 
 
 # Workflow --------------------------------------------------------------------

@@ -20,10 +20,10 @@ rule index_contigs:
 
 rule remap_to_contigs:
     input:
-        r1=lambda wildcards: get_fastq(wildcards, "fq1"),
-        r2=lambda wildcards: get_fastq(wildcards, "fq2"),
+        r1="{sample}/trimmed/{sample}_R1.fastq",
+        r2="{sample}/trimmed/{sample}_R2.fastq",
         contigs="{sample}/assembly/contigs.fasta",
-        index=lambda wildcards: expand("{sample}/assembly/contigs.fasta{ext}", {sample}=wildcards.sample, ext=[".amb", ".ann", ".bwt", ".pac", ". sa"]),
+        index=lambda wildcards: expand("{sample}/assembly/contigs.fasta{ext}", sample=wildcards.sample, ext=[".amb", ".ann", ".bwt", ".pac", ". sa"]),
     output:
         aln="{sample}/assembly/{sample}_aln.bam",
     threads:

@@ -1,55 +1,6 @@
 shell.executable("bash")
 
 
-rule map_reads_host:
-    input:
-        r1="{sample}/trimmed/{sample}_R1.fastq",
-        r2="{sample}/trimmed/{sample}_R2.fastq",
-    output:
-        aln="{sample}/host_mapping/{sample}_aln.sam",
-    params:
-        refs=config["indexed_ref"],
-    threads:
-        config['threads_sample']
-    message:
-        "Mapping {wildcards.sample} to host genomes"
-    conda:
-        "../envs/bwa.yaml"
-    log:
-        "logs/{sample}/mapping_host.log"
-    shell:
-        """
-        exec 2> {log}
-        bwa mem -t {threads} \
-            {params.refs} {input.r1} {input.r2} > {output.aln}
-        """
-
-
-rule mapping_stats_host:
-    input:
-        sam="{sample}/host_mapping/{sample}_aln.sam",
-    output:
-        flagstats="{sample}/host_mapping/{sample}_flagstats.tsv",
-        mapping_stats="{sample}/host_mapping/{sample}_mapstats.tsv",
-        unmapped_sam="{sample}/host_mapping/{sample}_unmapped.sam",
-        unmapped_stats="{sample}/host_mapping/{sample}_unmapstats.tsv",
-    message:
-        "Retrieving host_mapping stats for {wildcards.sample}"
-    conda:
-        "../envs/samtools.yaml"
-    log:
-        "logs/{sample}/host_mapping_stats.log"
-    shell:
-        """
-        exec 2> {log}
-        samtools flagstat -O tsv {input.sam} > {output.flagstats}
-        samtools stats {input.sam} > {output.mapping_stats}
-        # -F filtering UNMAP and MATE UNMAP reads (aka not mapped in proper pair)
-        samtools view -h -F 2 {input.sam} > {output.unmapped_sam}
-        samtools stats {output.unmapped_sam} > {output.unmapped_stats}
-        """
-
-
 rule map_seq2org:
     output:
         map="common/seqid_mapping.txt",
@@ -69,48 +20,107 @@ rule map_seq2org:
         """
 
 
-rule mapped_count_host:
+rule map_reads_host:
     input:
-        sam="{sample}/host_mapping/{sample}_aln.sam",
-        map="common/seqid_mapping.txt",
+        r1="{sample}/trimmed/{sample}_R1.fastq",
+        r2="{sample}/trimmed/{sample}_R2.fastq",
     output:
-        perseq="{sample}/host_mapping/{sample}_read_per_seq.txt",
-        perorg="{sample}/host_mapping/{sample}_read_per_org_long.txt",
+        aln="{sample}/host_mapping/{sample}_aln.bam",
+    params:
+        refs=config["indexed_ref"],
+    threads:
+        config['threads_sample']
     message:
-        "Counting reads per organism for {wildcards.sample}"
+        "Mapping {wildcards.sample} to host genomes"
     conda:
-        "../envs/samtools.yaml"
+        "../envs/bwa.yaml"
     log:
-        "logs/{sample}/count_reads.log"
+        "logs/{sample}/mapping_host.log"
     shell:
         """
-        # exec 2> {log}
-        # get count per seq
-        samtools view -f 2 -F 104 {input.sam} | cut -f3 | sort | uniq -c | sort -k2 > {output.perseq}
-        # Count per org
-        join -1 1 -2 2 -o 1.2,1.3,2.1 {input.map} {output.perseq} > {output.perorg}
+        exec 2> {log}
+        bwa mem -t {threads} \
+            {params.refs} {input.r1} {input.r2} \
+            | samtools sort -@{threads} -o {output.aln} 
         """
 
 
-rule collapse_counts_host:
+rule mapping_stats_host:
     input:
-        counts="{sample}/host_mapping/{sample}_read_per_org_long.txt",
+        aln="{sample}/host_mapping/{sample}_aln.bam",
     output:
-        counts="{sample}/host_mapping/{sample}_read_per_org.tsv",
+        flagstats="{sample}/host_mapping/{sample}_flagstats.tsv",
+        mapping_stats="{sample}/host_mapping/{sample}_mapstats.tsv",
     message:
-        "Collapsing read count per organism for {wildcards.sample}"
+        "Retrieving host_mapping stats for {wildcards.sample}"
+    conda:
+        "../envs/bwa.yaml"
     log:
-        "logs/{sample}/collapse_counts.log"
+        "logs/{sample}/host_mapping_stats.log"
+    shell:
+        """
+        exec 2> {log}
+        samtools flagstat -O tsv {input.aln} > {output.flagstats}
+        samtools stats {input.aln} > {output.mapping_stats}
+        """
+
+
+rule coverage_host:
+    input:
+        aln="{sample}/host_mapping/{sample}_aln.bam",
+    output:
+        cov="{sample}/host_mapping/{sample}_hosts_coverage.tsv",
+    message:
+        "Calculating host coverage for {wildcards.sample}"
+    conda:
+        "../envs/bwa.yaml"
+    log:
+        "logs/{sample}/host_coverage.log"
+    shell:
+        """
+        exec 2> {log}
+        # Coverage and calculate RPK and add header
+        samtools coverage {input.aln} > {output.cov}
+        """
+
+
+rule normalized_read_count:
+    input:
+        cov="{sample}/host_mapping/{sample}_hosts_coverage.tsv",
+        mapping_stats="{sample}/host_mapping/{sample}_mapstats.tsv",
+        map="common/seqid_mapping.txt",
+    output:
+        rpkm="{sample}/host_mapping/{sample}_rpkm.tsv",
+    message:
+        "Calculating RPKM per host for {wildcards.sample}"
+    log:
+        "logs/{sample}/rpkm.log"
     run:
         import sys
         sys.stderr = open(log[0], "w")
         
         import pandas as pd
         
-        df = pd.read_csv(input.counts, sep=" ", names=['genus', 'species', 'count'])
-        df=df.groupby(['genus', 'species']).sum().reset_index().sort_values('count', ascending=False)
-        df['organism'] = df['genus'].map(str) + ' ' + df['species'].map(str)
-        df[['organism', 'count']].to_csv(output.counts, sep="\t", index=False)
+        # get total reads
+        with open(input.mapping_stats, 'r') as fi:
+            for line in fi:
+                l = line.split("\t")
+                if l[0] == "SN" and l[1] == "reads mapped:":
+                    totalReads = l[2]
+        
+        # Adding organism info to coverage table, then collapse and finally calculate rpkm
+        map = pd.read_csv(input.map, sep=" ", anmes=['id', 'genus', 'species'])
+        cov = pd.read_csv(input.cov, sep="\t"
+            ).merge(
+                map, left_on="#rname", right_on='id', how='left'
+            ).groupby(
+                ['genus', 'species']
+            ).sum()
+        cov['RPKM'] = cov.apply(lambda x: 10^9 * x['numreads']/(x['endpos']*totalReads), axis = 1
+            ).reset_index(
+            ).sort_values(
+            'RPKM', ascending=False
+            )
+        cov['organism'] = cov['genus'].map(str) + ' ' + cov['species'].map(str)
+        df[['organism', 'RPKM']].to_csv(output.rpkm, sep="\t", index=False)
 
-
-    
