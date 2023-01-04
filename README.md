@@ -15,15 +15,6 @@ Loosely based on the Debode paper:
 
 ## TODO
 
-- recheck all the flags settings on samtools ops
-- perform samtools ops on bam
-- change hacky seq counts to idxstats
-- convert counts to rpkm
-- Clean up contig methods, keep only saute
-- Clean up unneeded read mappping
-- Add contig polishing
-- Add read counting on contigs (RPKM)
-
 ## Ideas for future dev
 
 - Compare bwa to simple kraken?

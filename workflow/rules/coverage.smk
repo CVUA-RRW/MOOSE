@@ -5,7 +5,7 @@ rule index_contigs:
     input:
         contigs="{sample}/assembly/contigs.fasta",
     output:
-        multiext("{sample}/assembly/contigs.fasta", ".amb", ".ann", ".bwt", ".pac", ". sa"),
+        multiext("{sample}/assembly/contigs.fasta", ".amb", ".ann", ".bwt", ".pac", ".sa"),
     message:
         "Indexing contigs for {wildcards.sample}"
     log:
@@ -14,7 +14,7 @@ rule index_contigs:
         "../envs/bwa.yaml"
     shell:
         """
-        bwa index merged_refs.fa &> {log}
+        bwa index {input.contigs} &> {log}
         """
 
 
@@ -23,7 +23,7 @@ rule remap_to_contigs:
         r1="{sample}/trimmed/{sample}_R1.fastq",
         r2="{sample}/trimmed/{sample}_R2.fastq",
         contigs="{sample}/assembly/contigs.fasta",
-        index=lambda wildcards: expand("{sample}/assembly/contigs.fasta{ext}", sample=wildcards.sample, ext=[".amb", ".ann", ".bwt", ".pac", ". sa"]),
+        index=lambda wildcards: expand("{sample}/assembly/contigs.fasta{ext}", sample=wildcards.sample, ext=[".amb", ".ann", ".bwt", ".pac", ".sa"]),
     output:
         aln="{sample}/assembly/{sample}_aln.bam",
     threads:
@@ -43,3 +43,20 @@ rule remap_to_contigs:
         """
 
 
+rule coverage_contigs:
+    input:
+        aln="{sample}/assembly/{sample}_aln.bam",
+    output:
+        cov="{sample}/assembly/{sample}_coverage.tsv",
+    message:
+        "Calculating contigs coverage for {wildcards.sample}"
+    conda:
+        "../envs/bwa.yaml"
+    log:
+        "logs/{sample}/host_coverage.log"
+    shell:
+        """
+        exec 2> {log}
+        # Coverage and calculate RPK and add header
+        samtools coverage {input.aln} > {output.cov}
+        """

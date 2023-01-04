@@ -106,21 +106,19 @@ rule normalized_read_count:
             for line in fi:
                 l = line.split("\t")
                 if l[0] == "SN" and l[1] == "reads mapped:":
-                    totalReads = l[2]
+                    miReads = int(l[2])/1000000
         
         # Adding organism info to coverage table, then collapse and finally calculate rpkm
-        map = pd.read_csv(input.map, sep=" ", anmes=['id', 'genus', 'species'])
+        map = pd.read_csv(input.map, sep=" ", names=['id', 'genus', 'species'])
         cov = pd.read_csv(input.cov, sep="\t"
             ).merge(
                 map, left_on="#rname", right_on='id', how='left'
             ).groupby(
                 ['genus', 'species']
-            ).sum()
-        cov['RPKM'] = cov.apply(lambda x: 10^9 * x['numreads']/(x['endpos']*totalReads), axis = 1
-            ).reset_index(
-            ).sort_values(
-            'RPKM', ascending=False
-            )
+            ).sum().reset_index()
+        cov['RPM'] = cov.apply(lambda x: x['numreads']/miReads, axis = 1)
+        cov['RPKM'] = cov.apply(lambda x: x['RPM']/(x['endpos']/1000), axis = 1)
+        cov = cov.sort_values('RPKM', ascending=False)
         cov['organism'] = cov['genus'].map(str) + ' ' + cov['species'].map(str)
-        df[['organism', 'RPKM']].to_csv(output.rpkm, sep="\t", index=False)
+        cov[['organism', 'RPKM']].to_csv(output.rpkm, sep="\t", index=False)
 

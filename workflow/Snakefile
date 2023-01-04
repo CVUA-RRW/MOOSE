@@ -47,7 +47,7 @@ rule all:
         expand("{sample}/blast/{sample}_blast.tsv" , sample=samples.index),
         # coverage
         expand("{sample}/assembly/{sample}_aln.bam", sample=samples.index),
-        # expand("{sample}/host_mapping/{sample}_flagstats.tsv", sample=samples.index),
+        expand("{sample}/assembly/{sample}_coverage.tsv", sample=samples.index),
         # expand( , sample=samples.index),
 
 
