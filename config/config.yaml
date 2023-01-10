@@ -6,13 +6,15 @@ threads_sample: 8 # quite critical for mapping. RAM footprint is big (30Gb per s
 indexed_ref: /home/debian/NGS/dev/GMO/references/merged_refs.fa
 # panel as blast db and indexed for bwa
 panel: /home/debian/NGS/dev/GMO/panel/gmo_feed_panel.fa
-
+# event specific sequences as BLAST db
+event_detection: /home/debian/NGS/dev/GMO/event_detection/event_detection_soja.fa
 
 # Trimming parameters
 read_length_required: 50
 qualified_quality_phred: 15
 qctrim_window_size: 4
 qctrim_mean_quality: 30
+
 # UMI/MBC detection (Agilent only)
 umi: True
 umi_loc: per_read 

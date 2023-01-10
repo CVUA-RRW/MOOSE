@@ -40,14 +40,16 @@ rule all:
         expand("{sample}/host_mapping/{sample}_flagstats.tsv", sample=samples.index),
         expand("{sample}/host_mapping/{sample}_rpkm.tsv", sample=samples.index),
         # assembly
-        expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
+        # expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
         expand("{sample}/assembly/contigs.fasta", sample=samples.index),
-        expand("{sample}/assembly/assembly_graph_connected.gfa", sample=samples.index),
+        # expand("{sample}/assembly/assembly_graph_connected.gfa", sample=samples.index),
         # blast
         expand("{sample}/blast/{sample}_blast.tsv" , sample=samples.index),
+        expand("{sample}/blast/{sample}_events.tsv" , sample=samples.index),
         # coverage
         expand("{sample}/assembly/{sample}_aln.bam", sample=samples.index),
         expand("{sample}/assembly/{sample}_coverage.tsv", sample=samples.index),
+        # expand("{sample}/assembly/{sample}_rpkm.tsv", sample=samples.index),
         # expand( , sample=samples.index),
 
 

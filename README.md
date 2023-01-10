@@ -11,9 +11,14 @@ Loosely based on the Debode paper:
 4. reference alignement to elements (SAUTE) + polishing (GFA connector ?)
 5. Find elements in contigs (BLAST)
 6. Count reads in contigs (per found elements? Per contig?)
-7. Compare host reads / transgene reads
+7. Try to detect event specific sequences (JRC-EURL Methods) in contigs
 
 ## TODO
+
+- Filter contigs by MAPQ (>30?)
+- Sometimes multiple highly similar contigs, leads to remapping with low MAPQ (multipe mapping positions)
+  Should try to collapse highly similar contigs. MAybe based on percent identity? Check sample A9
+- Graph Blast results: elements to contigs and event detection sequences to contigs
 
 ## Ideas for future dev
 
@@ -44,7 +49,7 @@ bwa index merged_refs.fa
 Then use merged_refs.fa as a reference
 Same thing for the panel
 
-### BLAST database for panel elements:
+### BLAST database for panel elements and event detection:
 
 ```
 makeblastdb -in panel.fa -dbtype nucl

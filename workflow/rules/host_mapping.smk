@@ -84,7 +84,7 @@ rule coverage_host:
         """
 
 
-rule normalized_read_count:
+rule host_rpkm:
     input:
         cov="{sample}/host_mapping/{sample}_hosts_coverage.tsv",
         mapping_stats="{sample}/host_mapping/{sample}_mapstats.tsv",
@@ -105,7 +105,7 @@ rule normalized_read_count:
         with open(input.mapping_stats, 'r') as fi:
             for line in fi:
                 l = line.split("\t")
-                if l[0] == "SN" and l[1] == "reads mapped:":
+                if l[0] == "SN" and l[1] == "raw total sequences:":
                     miReads = int(l[2])/1000000
         
         # Adding organism info to coverage table, then collapse and finally calculate rpkm
