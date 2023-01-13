@@ -30,6 +30,7 @@ rule blast_contigs:
         
         blast_formatter -archive {output.blast} -out {output.tabular} \
             -outfmt "6 qseqid sseqid slen qstart qend sstart send bitscore length sstrand pident mismatch "
+        echo "\n" >> {output.tabular}
         sed -i '1 i\query_id\tsubject_id\tsubjectlength\tquery_start\tquery_end\tsubject_start\tsubject_end\tbitscore\tlength\tstrand\tidentity\tmismatch' {output.tabular}
                 
         blast_formatter -archive {output.blast} -out {output.sam} -outfmt 17
@@ -63,6 +64,7 @@ rule find_events:
         
         blast_formatter -archive {output.blast} -out {output.tabular} \
             -outfmt "6 qseqid sseqid slen qlen qstart qend sstart send bitscore sstrand length pident" 
+        echo "\n" >> {output.tabular}
         sed -i '1 i\query_id\tsubject_id\tsubjectlength\tquery_length\tquery_start\tquery_end\tsubject_start\tsubject_end\tbitscore\tstrand\tlength\tidentity' {output.tabular}
         
         blast_formatter -archive {output.blast} -out {output.sam} -outfmt 17

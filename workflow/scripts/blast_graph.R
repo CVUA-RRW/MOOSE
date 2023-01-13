@@ -39,12 +39,12 @@ covdepth <-
     read_tsv(
         coverage, 
         col_names=c('contig_id', 'pos', 'depth'),
-        col_types="cii",
+        col_types="fii",
         skip=1
     )
 
 belements <- 
-    read_tsv(elements) %>%
+    read_tsv(elements, col_types="cciiiiiiicdi") %>%
     select(
         query_id, 
         subject_id, 
@@ -66,7 +66,7 @@ belements <-
         seq_end=subject_end)
         
 bevents <- 
-    read_tsv(events) %>%
+    read_tsv(events, col_types="cciiiiiiicid") %>%
     select(
         subject_id,
         query_id,
@@ -102,8 +102,8 @@ contigs <-
     pull('contig_id') %>%
     unique()
 
-# map over contigs
-walk(contigs, ~{
+# Plotting functions
+figure_with_blast <- function(.x, contig_lengths, blast, covdepth, n_blast) {
     total_length <- 
         filter(contig_lengths, contig_id==.x) %>%
         pull(contig_length)
@@ -155,7 +155,8 @@ walk(contigs, ~{
             show.legend=FALSE,
             linewidth=1) +
         theme_void() +
-        theme(legend.position="none")
+        theme(legend.position="none") +
+        xlim(0,total_length)
     
     # Coverage density
     depth_p <-
@@ -177,7 +178,8 @@ walk(contigs, ~{
             axis.ticks.x=element_blank(),
             axis.title.x=element_blank(),
             legend.position="none"
-        )
+        ) +
+        xlim(0,total_length)
     
     # Blast 
     blast_map <-
@@ -207,8 +209,9 @@ walk(contigs, ~{
         geom_text(
             aes(x=center, y=rowid, label=paste(direction, seq_id)),
             hjust='inward',
-            nudge_y=0.4
+            nudge_y=0.45
         ) +
+        scale_y_reverse() +
         labs(fill="Identity [%]") +
         ylab("Local sequence alignement") +
         xlab("Position") +
@@ -223,15 +226,10 @@ walk(contigs, ~{
         xlim(0,total_length)
 
     # merge graphs
-    n_blast <- 
-        blast_sorted %>% 
-        pull(rowid) %>%
-        max()
-
     main <- 
         plot_grid(
             depth_p, contig_map, blast_map, 
-            rel_heights=c(2, 1, n_blast),
+            rel_heights=c(3, 1, n_blast),
             labels="",
             ncol=1,
             align="v")
@@ -263,11 +261,115 @@ walk(contigs, ~{
         )
     
     # Make figure
-    plot_grid(
-        title, main, legend_b,
-        ncol = 1,
-        rel_heights = c(0.1, 1, 0.1)
-    )
+    figure <-
+        plot_grid(
+            title, main, legend_b,
+            ncol = 1,
+            rel_heights = c(0.1, 1, 0.1)
+        )
+    
+    return(figure)
+}
+
+figure_no_blast <- function(.x, contig_lengths, covdepth) {
+    total_length <- 
+        filter(contig_lengths, contig_id==.x) %>%
+        pull(contig_length)
+    
+    # Contig map
+    contig_map <-
+        ggplot() +
+        geom_segment(
+            aes(x=1, xend=total_length, y=0, yend=0),
+            # arrow=arrow(type='closed'),
+            lineend='butt',
+            # linejoin='mitre',
+            show.legend=FALSE,
+            inherit.aes=FALSE,
+            linewidth=2
+        ) +
+        xlab("Position") +
+        theme_classic() +
+        theme(
+            legend.position="none",
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank(),
+            axis.line.y=element_blank(),
+            axis.title.y=element_blank()
+            ) +
+        xlim(0,total_length)
+    
+    # Coverage density
+    depth_p <-
+        covdepth %>%
+        filter(contig_id==.x) %>%
+        arrange(pos) %>%
+        ggplot(aes(x=pos, y=depth)) +
+        geom_bar(
+            show.legend=FALSE, 
+            width=1, 
+            stat='identity',
+            fill='#2b83ba',
+            color='#2b83ba') +
+        theme_classic() +
+        ylab("Depth (number of reads)") +
+        theme(
+            axis.line.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.title.x=element_blank(),
+            legend.position="none"
+        ) +
+        xlim(0,total_length)
+    
+    # merge graphs
+    main <- 
+        plot_grid(
+            depth_p, contig_map, 
+            rel_heights=c(3, 1),
+            labels="",
+            ncol=1,
+            align="v")
+    
+    # Add title
+    title <- 
+        ggdraw() + 
+        draw_label(
+            paste0(sample_name, "\n", .x),
+            fontface = 'bold',
+            x = 0,
+            hjust = 0
+        ) +
+        theme(
+            # add margin on the left of the drawing canvas,
+            # so title is aligned with left edge of first plot
+            plot.margin = margin(0, 0, 0, 7)
+        )
+    
+    # Make figure
+    figure <-
+        plot_grid(
+            title, main,
+            ncol = 1,
+            rel_heights = c(0.1, 1)
+        )
+    
+    return(figure)
+}
+
+# map over contigs
+walk(contigs, ~{
+    n_blast <- 
+        blast %>% 
+        filter(contig_id==.x) %>%
+        pull(contig_id) %>%
+        length()
+    
+    if (n_blast > 0) {
+        fig <- figure_with_blast(.x, contig_lengths, blast, covdepth, n_blast)
+    } else {
+        fig <- figure_no_blast(.x, contig_lengths, covdepth)
+    }
     
     ggsave(
         file.path(out_folder, paste0(.x, ".pdf")),
@@ -280,4 +382,3 @@ walk(contigs, ~{
         units='cm'
     )
 })
-
