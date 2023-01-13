@@ -7,7 +7,7 @@ rule map_seq2org:
     params:
         refs=config["indexed_ref"],
     message:
-        "Mapping seqIDs to organisms"
+        "[all] mapping seqIDs to organisms"
     conda:
         "../envs/pandas.yaml"
     log:
@@ -25,13 +25,13 @@ rule map_reads_host:
         r1="{sample}/trimmed/{sample}_R1.fastq",
         r2="{sample}/trimmed/{sample}_R2.fastq",
     output:
-        aln="{sample}/host_mapping/{sample}_aln.bam",
+        aln="{sample}/host_mapping/{sample}_host_aln.bam",
     params:
         refs=config["indexed_ref"],
     threads:
         config['threads_sample']
     message:
-        "Mapping {wildcards.sample} to host genomes"
+        "[{wildcards.sample}] mapping reads to host genomes with BWA"
     conda:
         "../envs/bwa.yaml"
     log:
@@ -47,12 +47,12 @@ rule map_reads_host:
 
 rule mapping_stats_host:
     input:
-        aln="{sample}/host_mapping/{sample}_aln.bam",
+        aln="{sample}/host_mapping/{sample}_host_aln.bam",
     output:
-        flagstats="{sample}/host_mapping/{sample}_flagstats.tsv",
-        mapping_stats="{sample}/host_mapping/{sample}_mapstats.tsv",
+        flagstats="{sample}/host_mapping/{sample}_host_flagstats.tsv",
+        mapping_stats="{sample}/host_mapping/{sample}_host_mapstats.tsv",
     message:
-        "Retrieving host_mapping stats for {wildcards.sample}"
+        "[{wildcards.sample}] retrieving host mapping statistics"
     conda:
         "../envs/bwa.yaml"
     log:
@@ -67,11 +67,11 @@ rule mapping_stats_host:
 
 rule coverage_host:
     input:
-        aln="{sample}/host_mapping/{sample}_aln.bam",
+        aln="{sample}/host_mapping/{sample}_host_aln.bam",
     output:
-        cov="{sample}/host_mapping/{sample}_hosts_coverage.tsv",
+        cov="{sample}/host_mapping/{sample}_host_coverage.tsv",
     message:
-        "Calculating host coverage for {wildcards.sample}"
+        "[{wildcards.sample}] calculating host coverage"
     conda:
         "../envs/bwa.yaml"
     log:
@@ -86,13 +86,13 @@ rule coverage_host:
 
 rule host_rpkm:
     input:
-        cov="{sample}/host_mapping/{sample}_hosts_coverage.tsv",
-        mapping_stats="{sample}/host_mapping/{sample}_mapstats.tsv",
+        cov="{sample}/host_mapping/{sample}_host_coverage.tsv",
+        mapping_stats="{sample}/host_mapping/{sample}_host_mapstats.tsv",
         map="common/seqid_mapping.txt",
     output:
-        rpkm="{sample}/host_mapping/{sample}_rpkm.tsv",
+        rpkm="{sample}/host_mapping/{sample}_host_rpkm.tsv",
     message:
-        "Calculating RPKM per host for {wildcards.sample}"
+        "[{wildcards.sample}] calculating RPKM per host"
     log:
         "logs/{sample}/rpkm.log"
     run:

@@ -23,7 +23,7 @@ rule run_fastp:
         umi_len=f"--umi_len {config['umi_len']}"if config['umi'] else "",
     threads: config["threads_sample"]
     message:
-        "Running fastp on {wildcards.sample}"
+        "[{wildcards.sample}] quality trimming with FASTP"
     conda:
         "../envs/fastp.yaml"
     log:

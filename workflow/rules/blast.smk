@@ -1,9 +1,9 @@
 shell.executable("bash")
 
 
-rule blast_scaffolds:
+rule blast_contigs:
     input:
-        contigs="{sample}/assembly/contigs.fasta",
+        contigs="{sample}/assembly/{sample}_contigs.fasta",
     output:
         blast="{sample}/blast/{sample}_blast.asn",
         tabular="{sample}/blast/{sample}_blast.tsv",
@@ -15,7 +15,7 @@ rule blast_scaffolds:
     threads:
         config['threads_sample']
     message:
-        "Aligning contigs to panel for {wildcards.sample}"
+        "[{wildcards.sample}] aligning contigs to panel with BLAST"
     conda:
         "../envs/blast.yaml"
     log:
@@ -40,7 +40,7 @@ rule blast_scaffolds:
 
 rule find_events:
     input:
-        contigs="{sample}/assembly/contigs.fasta",
+        contigs="{sample}/assembly/{sample}_contigs.fasta",
     output:
         blast="{sample}/blast/{sample}_events.asn",
         tabular="{sample}/blast/{sample}_events.tsv",
@@ -49,7 +49,7 @@ rule find_events:
     params:
         events=config['event_detection']
     message:
-        "Detecting event-specific sequences in {wildcards.sample}"
+        "[{wildcards.sample}] detecting event-specific sequences with BLAST"
     conda:
         "../envs/blast.yaml"
     log:

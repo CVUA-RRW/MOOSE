@@ -1,2 +1,4 @@
 .snakemake
+.RData
+.Rhistory
 nohup.out
