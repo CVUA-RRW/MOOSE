@@ -50,5 +50,5 @@ rpkm_p <-
         )
 
 
-ggsave(out_pdf, width=12, units='cm')
-ggsave(out_png, width=12, units='cm')
+ggsave(out_pdf, width=18, height=18, units='cm')
+ggsave(out_png, width=18, height=18, units='cm')
