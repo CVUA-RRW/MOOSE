@@ -1,9 +1,11 @@
 #!/usr/bin/env Rscript
 
+
 # logging
 log = file(snakemake@log[[1]], open='wt')
 sink(log)
 sink(log, type='message')
+
 
 # Imports
 library(tidyverse)
@@ -12,6 +14,7 @@ library(cowplot)
 # library(plotly)
 # library(htmlwidgets)
 
+
 # Get snakemake parameters
 coverage <- snakemake@input[['coverage']]
 elements <- snakemake@input[['elements']]
@@ -19,6 +22,7 @@ events <- snakemake@input[['events']]
 out_folder <- snakemake@output[['plot_dir']]
 # out_html <- snakemake@output[['html']]
 sample_name <- snakemake@params[['sample']]
+
 
 # Aestethics
 id_breaks <- c(0,60,70,80,90,100)
@@ -32,41 +36,12 @@ color_scale <- c(
     )
     
 
+
 dir.create(out_folder)
 
-# Load data and format
-covdepth <- 
-    read_tsv(
-        coverage, 
-        col_names=c('contig_id', 'pos', 'depth'),
-        col_types="fii",
-        skip=1
-    )
 
-belements <- 
-    read_tsv(elements, col_types="cciiiiiiicdi") %>%
-    select(
-        query_id, 
-        subject_id, 
-        query_start,
-        query_end,
-        subjectlength,
-        subject_start,
-        subject_end,
-        strand,
-        identity
-    ) %>%
-    rename(
-        contig_id=query_id,
-        seq_id=subject_id, 
-        contig_start=query_start,
-        contig_end=query_end,
-        seq_length=subjectlength,
-        seq_start=subject_start,
-        seq_end=subject_end)
-        
-bevents <- 
-    read_tsv(events, col_types="cciiiiiiicid") %>%
+parse_blast <- function(filepath) {
+    read_tsv(filepath, col_types="cciiiiiiicidi") %>%
     select(
         subject_id,
         query_id,
@@ -87,22 +62,33 @@ bevents <-
         seq_start=query_start,
         seq_end=query_end
     )
+}
 
-contig_lengths <-
-    covdepth %>% 
-    group_by(contig_id) %>% 
-    slice_max(pos) %>% 
-    select(-depth) %>% 
-    rename(contig_length=pos)
 
-blast <- bind_rows(belements, bevents)
+coverage_plot <- function(coverage, contig_name, contig_length) {
+    coverage %>%
+        filter(contig_id==contig_name) %>%
+        arrange(pos) %>%
+        ggplot(aes(x=pos, y=depth)) +
+        geom_bar(
+            show.legend=FALSE, 
+            width=1, 
+            stat='identity',
+            fill='#2b83ba',
+            color='#2b83ba') +
+        theme_classic() +
+        ylab("Depth (number of reads)") +
+        theme(
+            axis.line.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.title.x=element_blank(),
+            legend.position="none"
+        ) +
+        xlim(0,contig_length)
+}
 
-contigs <- 
-    covdepth %>%
-    pull('contig_id') %>%
-    unique()
 
-# Plotting functions
 figure_with_blast <- function(.x, contig_lengths, blast, covdepth, n_blast) {
     total_length <- 
         filter(contig_lengths, contig_id==.x) %>%
@@ -159,27 +145,7 @@ figure_with_blast <- function(.x, contig_lengths, blast, covdepth, n_blast) {
         xlim(0,total_length)
     
     # Coverage density
-    depth_p <-
-        covdepth %>%
-        filter(contig_id==.x) %>%
-        arrange(pos) %>%
-        ggplot(aes(x=pos, y=depth)) +
-        geom_bar(
-            show.legend=FALSE, 
-            width=1, 
-            stat='identity',
-            fill='#2b83ba',
-            color='#2b83ba') +
-        theme_classic() +
-        ylab("Depth (number of reads)") +
-        theme(
-            axis.line.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.title.x=element_blank(),
-            legend.position="none"
-        ) +
-        xlim(0,total_length)
+    depth_p <- coverage_plot(covdepth, .x, total_length)
     
     # Blast 
     blast_map <-
@@ -271,6 +237,7 @@ figure_with_blast <- function(.x, contig_lengths, blast, covdepth, n_blast) {
     return(figure)
 }
 
+
 figure_no_blast <- function(.x, contig_lengths, covdepth) {
     total_length <- 
         filter(contig_lengths, contig_id==.x) %>%
@@ -300,27 +267,7 @@ figure_no_blast <- function(.x, contig_lengths, covdepth) {
         xlim(0,total_length)
     
     # Coverage density
-    depth_p <-
-        covdepth %>%
-        filter(contig_id==.x) %>%
-        arrange(pos) %>%
-        ggplot(aes(x=pos, y=depth)) +
-        geom_bar(
-            show.legend=FALSE, 
-            width=1, 
-            stat='identity',
-            fill='#2b83ba',
-            color='#2b83ba') +
-        theme_classic() +
-        ylab("Depth (number of reads)") +
-        theme(
-            axis.line.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.title.x=element_blank(),
-            legend.position="none"
-        ) +
-        xlim(0,total_length)
+    depth_p <- coverage_plot(covdepth, .x, total_length)
     
     # merge graphs
     main <- 
@@ -356,6 +303,38 @@ figure_no_blast <- function(.x, contig_lengths, covdepth) {
     
     return(figure)
 }
+
+
+# Load data and format
+covdepth <- 
+    read_tsv(
+        coverage, 
+        col_names=c('contig_id', 'pos', 'depth'),
+        col_types="fii",
+        skip=1
+    )
+
+
+contig_lengths <-
+    covdepth %>% 
+    group_by(contig_id) %>% 
+    slice_max(pos) %>% 
+    select(-depth) %>% 
+    rename(contig_length=pos)
+
+
+blast <- 
+    bind_rows(
+        parse_blast(elements), 
+        parse_blast(events)
+    )
+
+
+contigs <- 
+    covdepth %>%
+    pull('contig_id') %>%
+    unique()
+
 
 # map over contigs
 walk(contigs, ~{

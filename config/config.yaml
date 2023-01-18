@@ -2,11 +2,11 @@ workdir: /home/debian/NGS/dev/GMO/test
 samples: /home/debian/NGS/dev/GMO/fastq/samples.tsv
 threads_sample: 8 # quite critical for mapping. RAM footprint is big (30Gb per sample?) so maximize CPU usage by making one sample at a time. 
 
-# genomes: /home/debian/NGS/dev/GMO/references/genomes.tsv
+# genomes: /home/debian/NGS/dev/GMO/references/genomes.tsv (BWA indexed)
 indexed_ref: /home/debian/NGS/dev/GMO/references/merged_refs.fa
-# panel as blast db and indexed for bwa
+# panel fasta file
 panel: /home/debian/NGS/dev/GMO/panel/gmo_feed_panel.fa
-# event specific sequences as BLAST db
+# event specific sequences as fasta
 event_detection: /home/debian/NGS/dev/GMO/event_detection/event_detection_soja.fa
 
 # Trimming parameters

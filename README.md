@@ -47,10 +47,4 @@ bwa index merged_refs.fa
 ```
 
 Then use merged_refs.fa as a reference
-Same thing for the panel
 
-### BLAST database for panel elements and event detection:
-
-```
-makeblastdb -in panel.fa -dbtype nucl
-```

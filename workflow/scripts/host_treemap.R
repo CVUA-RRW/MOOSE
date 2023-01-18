@@ -6,6 +6,7 @@ log = file(snakemake@log[[1]], open='wt')
 sink(log)
 sink(log, type='message')
 
+
 # Imports
 library(tidyverse)
 library(RColorBrewer)
@@ -13,12 +14,14 @@ library(treemapify)
 # library(plotly)
 # library(htmlwidgets)
 
+
 # Get snakemake parameters
 input <- snakemake@input[['rpkm']]
 out_pdf <- snakemake@output[['pdf']]
 out_png <- snakemake@output[['png']]
 out_html <- snakemake@output[['html']]
 sample_name <- snakemake@params[['sample']]
+
 
 # Load and plot data
 rpkm <- read_tsv(input)
@@ -46,17 +49,6 @@ rpkm_p <-
         caption="Box areas are proportional to the RPKM (reads per kilobase per million) value for each host genome."
         )
 
-ggsave(out_pdf)
-ggsave(out_png)
 
-# Interactive html chart
-
-# rpkm_ply <-
-    # ggplotly(
-        # p=rpkm_p,
-        # width=600,
-        # height=600,
-        # tooltip=c('organism', 'RPKM')
-        # )
-
-# saveWidget(rpkm_ply, file=out_html)
+ggsave(out_pdf, width=12, units='cm')
+ggsave(out_png, width=12, units='cm')

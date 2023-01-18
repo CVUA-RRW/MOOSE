@@ -15,7 +15,7 @@ rule blast_contigs:
     threads:
         config['threads_sample']
     message:
-        "[{wildcards.sample}] aligning contigs to panel with BLAST"
+        "[{wildcards.sample}] aligning panel elements to contigs with BLAST"
     conda:
         "../envs/blast.yaml"
     log:
@@ -24,15 +24,15 @@ rule blast_contigs:
         """
         exec 2> {log}
         
-        blastn -query {input.contigs} -out {output.blast} -db {params.panel} \
+        blastn -query  {params.panel} -out {output.blast} -subject {input.contigs} \
             -task megablast \
             -outfmt 11 -num_threads {threads}
         
         blast_formatter -archive {output.blast} -out {output.tabular} \
-            -outfmt "6 qseqid sseqid slen qstart qend sstart send bitscore length sstrand pident mismatch "
+            -outfmt "6 qseqid sseqid qlen slen qstart qend sstart send bitscore sstrand length pident mismatch"
         echo "\n" >> {output.tabular}
-        sed -i '1 i\query_id\tsubject_id\tsubjectlength\tquery_start\tquery_end\tsubject_start\tsubject_end\tbitscore\tlength\tstrand\tidentity\tmismatch' {output.tabular}
-                
+        sed -i '1 i\query_id\tsubject_id\tquery_length\tsubjectlength\tquery_start\tquery_end\tsubject_start\tsubject_end\tbitscore\tstrand\tlength\tidentity\tmismatch' {output.tabular}
+        
         blast_formatter -archive {output.blast} -out {output.sam} -outfmt 17
         
         blast_formatter -archive {output.blast} -out {output.pairs} -outfmt 0
@@ -63,9 +63,9 @@ rule find_events:
             -task blastn -outfmt 11 -subject_besthit -perc_identity 100
         
         blast_formatter -archive {output.blast} -out {output.tabular} \
-            -outfmt "6 qseqid sseqid slen qlen qstart qend sstart send bitscore sstrand length pident" 
+            -outfmt "6 qseqid sseqid qlen slen qstart qend sstart send bitscore sstrand length pident mismatch"
         echo "\n" >> {output.tabular}
-        sed -i '1 i\query_id\tsubject_id\tsubjectlength\tquery_length\tquery_start\tquery_end\tsubject_start\tsubject_end\tbitscore\tstrand\tlength\tidentity' {output.tabular}
+        sed -i '1 i\query_id\tsubject_id\tquery_length\tsubjectlength\tquery_start\tquery_end\tsubject_start\tsubject_end\tbitscore\tstrand\tlength\tidentity\tmismatch' {output.tabular}
         
         blast_formatter -archive {output.blast} -out {output.sam} -outfmt 17
         
