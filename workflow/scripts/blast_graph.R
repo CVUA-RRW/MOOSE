@@ -122,10 +122,6 @@ figure_with_blast <- function(.x, contig_lengths, blast, covdepth, n_blast) {
             direction=if_else(strand=="plus", '(+)', '(-)')
         )
     
-    ### DEBUG ###
-    blast_sorted %>% write_tsv(paste0(out_folder, .x, '.tsv'))
-    ### DEBUG ###
-    
     # Contig map
     contig_map <-
         ggplot(blast_sorted) +

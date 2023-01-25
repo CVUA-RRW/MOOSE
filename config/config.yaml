@@ -25,6 +25,7 @@ umi_len: 3
 # Assembly parameters (SAUTE)
 assembly_kmer_min_count: 1 # Default=2
 assembly_noise_to_signal: 0.05 # Default=0.05
+assembly_identity_collapse: 0.9
 
 # BLAST parameters
 

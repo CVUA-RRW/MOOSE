@@ -15,9 +15,11 @@ Loosely based on the Debode paper:
 
 ## TODO
 
-- Filter contigs by MAPQ (>30?), or add a clustering step to reduce duplicates
-- Sometimes multiple highly similar contigs, leads to remapping with low MAPQ (multipe mapping positions)
-  Should try to collapse highly similar contigs. MAybe based on percent identity?
+- Create reports
+- chop contigs and reblast part with no matches? 
+	set a min length to chop (100bp?)
+	use full BLAST db (local)
+	hit selection? (best hit?)
 
 ## Ideas for future dev
 

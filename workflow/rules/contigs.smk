@@ -31,11 +31,33 @@ rule target_enriched_assembly:
         """
 
 
-rule index_contigs:
+rule collapse_identical_contigs:
     input:
         contigs="{sample}/assembly/{sample}_contigs.fasta",
     output:
-        multiext("{sample}/assembly/{sample}_contigs.fasta", ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        contigs="{sample}/assembly/{sample}_collapsed_contigs.fasta",
+        table="{sample}/assembly/{sample}_clustering.tsv",
+    message:
+        "[{wildcards.sample}] collapsing highly similar contigs with VSEARCH"
+    params:
+        id=config["assembly_identity_collapse"],
+    conda:
+        "../envs/vsearch.yaml"
+    log:
+        "logs/{sample}/collapse_vsearch.log"
+    shell:
+        """
+        exec 2> {log}
+        vsearch --cluster_fast {input.contigs} --consout {output.contigs} --id {params.id} \
+            --strand both -uc {output.table} --fasta_width 0 --xsize
+        """
+
+
+rule index_contigs:
+    input:
+        contigs="{sample}/assembly/{sample}_collapsed_contigs.fasta",
+    output:
+        multiext("{sample}/assembly/{sample}_collapsed_contigs.fasta", ".amb", ".ann", ".bwt", ".pac", ".sa"),
     message:
         "[{wildcards.sample}] indexing contigs"
     log:
@@ -52,8 +74,8 @@ rule remap_to_contigs:
     input:
         r1="{sample}/trimmed/{sample}_R1.fastq",
         r2="{sample}/trimmed/{sample}_R2.fastq",
-        contigs="{sample}/assembly/{sample}_contigs.fasta",
-        index=lambda wildcards: expand("{sample}/assembly/{sample}_contigs.fasta{ext}", sample=wildcards.sample, ext=[".amb", ".ann", ".bwt", ".pac", ".sa"]),
+        contigs="{sample}/assembly/{sample}_collapsed_contigs.fasta",
+        index=lambda wildcards: expand("{sample}/assembly/{sample}_collapsed_contigs.fasta{ext}", sample=wildcards.sample, ext=[".amb", ".ann", ".bwt", ".pac", ".sa"]),
     output:
         aln="{sample}/assembly/{sample}_aln.bam",
     threads:
@@ -123,46 +145,4 @@ rule contigs_rpkm:
         cov['RPKM'] = cov.apply(lambda x: x['RPM']/(x['endpos']/1000), axis = 1)
         cov = cov.sort_values('RPKM', ascending=False)
         cov[['#rname', 'RPKM']].to_csv(output.rpkm, sep="\t", index=False)
-
-
-# rule connect_assembly:
-    # input:
-        # r1="{sample}/trimmed/{sample}_R1.fastq",
-        # r2="{sample}/trimmed/{sample}_R2.fastq",
-        # contigs="{sample}/assembly/contigs.fasta",
-    # output:
-        # gfa="{sample}/assembly/{sample}_assembly_graph_connected.gfa",
-        # csv="{sample}/assembly/{sample}_gfa_connection.csv",
-    # conda:
-        # "../envs/saute.yaml"
-    # message:
-        # "Attempting to connect contigs for {wildcards.sample}"
-    # threads:
-        # config['threads_sample']
-    # log:
-        # "logs/{sample}/gfa_connector.log"
-    # shell:
-        # """
-        # gfa_connector --cores {threads} \
-            # --reads {input.r1},{input.r2} --contigs {input.contigs}\
-            # --gfa {output.gfa} --csv {output.csv} \
-            # --vector_percent 1 &> {log}
-        # """
-
-# rule contigs_qc:
-    # input:
-        # contigs="{sample}/assembly/{sample}_contigs.fasta",
-    # output:
-        # quast_dir=directory("{sample}/assembly/quast/"),
-        # report="{sample}/assembly/quast/report.tsv",
-    # message:
-        # "Quality control of {wildcards.sample} assembly"
-    # conda:
-        # "../envs/quast.yaml"
-    # log:
-        # "logs/{sample}/assembly_qc.log"
-    # shell:
-        # """
-        # quast.py --output-dir {output.quast_dir} {input.contigs} &> {log}
-        # """
 
