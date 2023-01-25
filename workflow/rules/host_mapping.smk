@@ -95,30 +95,7 @@ rule host_rpkm:
         "[{wildcards.sample}] calculating RPKM per host"
     log:
         "logs/{sample}/rpkm.log"
-    run:
-        import sys
-        sys.stderr = open(log[0], "w")
-        
-        import pandas as pd
-        
-        # get total reads
-        with open(input.mapping_stats, 'r') as fi:
-            for line in fi:
-                l = line.split("\t")
-                if l[0] == "SN" and l[1] == "raw total sequences:":
-                    miReads = int(l[2])/1000000
-        
-        # Adding organism info to coverage table, then collapse and finally calculate rpkm
-        map = pd.read_csv(input.map, sep=" ", names=['id', 'genus', 'species'])
-        cov = pd.read_csv(input.cov, sep="\t"
-            ).merge(
-                map, left_on="#rname", right_on='id', how='left'
-            ).groupby(
-                ['genus', 'species']
-            ).sum().reset_index()
-        cov['RPM'] = cov.apply(lambda x: x['numreads']/miReads, axis = 1)
-        cov['RPKM'] = cov.apply(lambda x: x['RPM']/(x['endpos']/1000), axis = 1)
-        cov = cov.sort_values('RPKM', ascending=False)
-        cov['organism'] = cov['genus'].map(str) + ' ' + cov['species'].map(str)
-        cov[['organism', 'RPKM']].to_csv(output.rpkm, sep="\t", index=False)
-
+    conda:
+        "../envs/pandas.yaml"
+    script:
+        "../scripts/host_reads_to_rpkm.py"

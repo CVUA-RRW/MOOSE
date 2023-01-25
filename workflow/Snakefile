@@ -31,7 +31,7 @@ include: "rules/common.smk"
 rule all:
     input:
         # trimming
-        expand("{sample}/trimmed/{sample}.html", sample=samples.index),
+        "reports/fastp_stats.tsv",
         # host mapping
         # expand("{sample}/host_mapping/{sample}_host_aln.bam", sample=samples.index),
         # expand("{sample}/host_mapping/{sample}_host_coverage.tsv", sample=samples.index),

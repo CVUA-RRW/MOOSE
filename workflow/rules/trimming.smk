@@ -44,3 +44,41 @@ rule run_fastp:
             {params.umi} {params.umi_loc} {params.umi_len} \
         > {log} 2>&1
         """
+
+
+rule parse_fastp:
+    input:
+        json="{sample}/trimmed/{sample}.json",
+        html="{sample}/trimmed/{sample}.html",
+    output:
+        tsv=temp("{sample}/trimmed/{sample}_fastp.tsv"),
+    message:
+        "[{wildcards.sample}] parsing FASTP json report"
+    conda:
+        "../envs/pandas.yaml"
+    log:
+        "logs/{sample}/parse_fatsp.log",
+    script:
+        "../scripts/parse_fastp.py"
+
+
+rule collect_trimming_stats:
+    input:
+        report=expand("{sample}/reports/{sample}_trimmed.tsv", sample=samples.index),
+    output:
+        agg="reports/fastp_stats.tsv",
+    message:
+        "[All] aggregating fastp stats"
+    log:
+        "logs/all/trimming_stats.log",
+    conda:
+        "../envs/pandas.yaml"
+    shell:
+        """
+        exec 2> {log}
+        cat {input.report[0]} | head -n 1 > {output.agg}
+        for i in {input.report}; do 
+            cat ${{i}} | tail -n +2 >> {output.agg}
+        done
+        """
+
