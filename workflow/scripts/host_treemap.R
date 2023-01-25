@@ -11,8 +11,6 @@ sink(log, type='message')
 library(tidyverse)
 library(RColorBrewer)
 library(treemapify)
-# library(plotly)
-# library(htmlwidgets)
 
 
 # Get snakemake parameters
@@ -52,3 +50,4 @@ rpkm_p <-
 
 ggsave(out_pdf, width=18, height=18, units='cm')
 ggsave(out_png, width=18, height=18, units='cm')
+

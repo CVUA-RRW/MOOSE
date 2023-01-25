@@ -11,8 +11,8 @@ sink(log, type='message')
 library(tidyverse)
 library(RColorBrewer)
 library(cowplot)
-# library(plotly)
-# library(htmlwidgets)
+library(plotly)
+library(htmltools)
 
 
 # Get snakemake parameters
@@ -117,10 +117,14 @@ figure_with_blast <- function(.x, contig_lengths, blast, covdepth, n_blast) {
         # get the start and stop of the query sequence relative to the contig
         # and add stuffs for labels
         mutate(
-            seq_start_contig=if_else(strand=="plus", contig_start-seq_start, contig_start-(seq_length-seq_end)),
-            seq_end_contig=if_else(strand=="plus", contig_end+(seq_length-seq_end), contig_end+seq_start),
+            seq_start_contig=if_else(strand=="plus", contig_start-seq_start, contig_end-seq_start),
+            seq_end_contig=if_else(strand=="plus", contig_end+(seq_length-seq_end), contig_start+(seq_length-seq_end)),
             direction=if_else(strand=="plus", '(+)', '(-)')
         )
+    
+    ### DEBUG ###
+    blast_sorted %>% write_tsv(paste0(out_folder, .x, '.tsv'))
+    ### DEBUG ###
     
     # Contig map
     contig_map <-
@@ -350,14 +354,20 @@ walk(contigs, ~{
         fig <- figure_no_blast(.x, contig_lengths, covdepth)
     }
     
+    fixed_name <- str_replace_all(.x, ":", "-")
+    
     ggsave(
-        file.path(out_folder, paste0(.x, ".pdf")),
+        file.path(out_folder, paste0(fixed_name, ".pdf")),
         width =18,
         units='cm'
     )
     ggsave(
-        file.path(out_folder, paste0(.x, ".png")),
+        file.path(out_folder, paste0(fixed_name, ".png")),
         width= 18,
         units='cm'
     )
+    
+    figly <- ggplotly(fig)
+    save_html(figly, file.path(out_folder, paste0(fixed_name, ".html")))
+    
 })

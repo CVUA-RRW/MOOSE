@@ -9,8 +9,8 @@ rule run_fastp:
         r1=lambda wildcards: get_fastq(wildcards, "fq1"),
         r2=lambda wildcards: get_fastq(wildcards, "fq2"),
     output:
-        r1=temp("{sample}/trimmed/{sample}_R1.fastq"),
-        r2=temp("{sample}/trimmed/{sample}_R2.fastq"),
+        r1="{sample}/trimmed/{sample}_R1.fastq",
+        r2="{sample}/trimmed/{sample}_R2.fastq",
         json="{sample}/trimmed/{sample}.json",
         html="{sample}/trimmed/{sample}.html",
     params:

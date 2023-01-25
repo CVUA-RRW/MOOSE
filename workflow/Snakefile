@@ -33,11 +33,11 @@ rule all:
         # trimming
         expand("{sample}/trimmed/{sample}.html", sample=samples.index),
         # host mapping
-        expand("{sample}/host_mapping/{sample}_host_aln.bam", sample=samples.index),
-        expand("{sample}/host_mapping/{sample}_host_coverage.tsv", sample=samples.index),
-        expand("{sample}/host_mapping/{sample}_host_mapstats.tsv", sample=samples.index),
-        expand("{sample}/host_mapping/{sample}_host_flagstats.tsv", sample=samples.index),
-        expand("{sample}/host_mapping/{sample}_host_rpkm.tsv", sample=samples.index),
+        # expand("{sample}/host_mapping/{sample}_host_aln.bam", sample=samples.index),
+        # expand("{sample}/host_mapping/{sample}_host_coverage.tsv", sample=samples.index),
+        # expand("{sample}/host_mapping/{sample}_host_mapstats.tsv", sample=samples.index),
+        # expand("{sample}/host_mapping/{sample}_host_flagstats.tsv", sample=samples.index),
+        # expand("{sample}/host_mapping/{sample}_host_rpkm.tsv", sample=samples.index),
         # assembly
         # expand("{sample}/assembly/quast/report.tsv", sample=samples.index),
         expand("{sample}/assembly/{sample}_contigs.fasta", sample=samples.index),
@@ -51,7 +51,7 @@ rule all:
         expand("{sample}/assembly/{sample}_coverage_depth.tsv", sample=samples.index),
         # expand("{sample}/assembly/{sample}_rpkm.tsv", sample=samples.index),
         # reports
-        expand("{sample}/reports/{sample}_hosts_detection.png", sample=samples.index),
+        # expand("{sample}/reports/{sample}_hosts_detection.png", sample=samples.index),
         expand("{sample}/reports/blast_graph_artifact", sample=samples.index),
         # expand( , sample=samples.index),
 

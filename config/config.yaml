@@ -5,7 +5,7 @@ threads_sample: 8 # quite critical for mapping. RAM footprint is big (30Gb per s
 # genomes: /home/debian/NGS/dev/GMO/references/genomes.tsv (BWA indexed)
 indexed_ref: /home/debian/NGS/dev/GMO/references/merged_refs.fa
 # panel fasta file
-panel: /home/debian/NGS/dev/GMO/panel/gmo_feed_panel.fa
+panel: /home/debian/NGS/dev/GMO/panel/gmo_feed_panel_v2_ongoing.fa
 # event specific sequences as fasta
 event_detection: /home/debian/NGS/dev/GMO/event_detection/event_detection_soja.fa
 
@@ -22,7 +22,9 @@ umi_len: 3
 
 # Mapping parameters (host)
 
-# Assembly parameters
+# Assembly parameters (SAUTE)
+assembly_kmer_min_count: 1 # Default=2
+assembly_noise_to_signal: 0.05 # Default=0.05
 
 # BLAST parameters
 

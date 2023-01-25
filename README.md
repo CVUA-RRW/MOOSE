@@ -15,16 +15,14 @@ Loosely based on the Debode paper:
 
 ## TODO
 
-- Filter contigs by MAPQ (>30?)
+- Filter contigs by MAPQ (>30?), or add a clustering step to reduce duplicates
 - Sometimes multiple highly similar contigs, leads to remapping with low MAPQ (multipe mapping positions)
-  Should try to collapse highly similar contigs. MAybe based on percent identity? Check sample A9
-- Graph Blast results: elements to contigs and event detection sequences to contigs
+  Should try to collapse highly similar contigs. MAybe based on percent identity?
 
 ## Ideas for future dev
 
 - Compare bwa to simple kraken?
 - If bwa upgrade to bwa2
-- Contig Blast viewer
 - Automated event detection (API to BCH/Euginius)?
 
 ## Notes
@@ -48,3 +46,5 @@ bwa index merged_refs.fa
 
 Then use merged_refs.fa as a reference
 
+### Panel sequences
+Multifasta format, unwrapped sequences!

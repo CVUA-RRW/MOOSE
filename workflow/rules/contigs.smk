@@ -13,6 +13,8 @@ rule target_enriched_assembly:
         "[{wildcards.sample}] read assembly with SAUTE"
     params:
         panel=config['panel'],
+        assembly_kmer_min_count=config['assembly_kmer_min_count'],
+        assembly_noise_to_signal=config['assembly_noise_to_signal'],
     threads:
         config['threads_sample']
     conda:
@@ -24,6 +26,7 @@ rule target_enriched_assembly:
         saute --cores {threads} \
             --gfa {output.gfa} --reads {input.r1},{input.r2} \
             --targets {params.panel} --all_variants {output.all_contigs} --selected_variants {output.contigs} \
+            --min_count {params.assembly_kmer_min_count} --fraction {params.assembly_noise_to_signal} --protect_reference_ends \
             --vector_percent 1 --extend_ends &> {log}
         """
 
