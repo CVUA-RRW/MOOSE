@@ -8,18 +8,20 @@ Loosely based on the Debode paper:
 1. Quality trimming (fastp)
 2. Align reads to reference genomes of big 6 (bwa)
 3. Extract RPKM values for each host
-4. reference alignement to elements (SAUTE) + polishing (GFA connector ?)
+4. reference alignement to elements (SAUTE)
 5. Find elements in contigs (BLAST)
-6. Count reads in contigs (per found elements? Per contig?)
+6. Count reads in contigs ang get coverage
 7. Try to detect event specific sequences (JRC-EURL Methods) in contigs
 
 ## TODO
 
 - Create reports
+- Check if kraken instead of bwa doable
 - chop contigs and reblast part with no matches? 
 	set a min length to chop (100bp?)
 	use full BLAST db (local)
 	hit selection? (best hit?)
+- BLASTGraph improvement, check out ggcontigs (R)
 
 ## Ideas for future dev
 

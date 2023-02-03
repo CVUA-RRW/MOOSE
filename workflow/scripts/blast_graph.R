@@ -363,7 +363,7 @@ walk(contigs, ~{
         units='cm'
     )
     
-    figly <- ggplotly(fig)
-    save_html(figly, file.path(out_folder, paste0(fixed_name, ".html")))
+    # figly <- ggplotly(fig)
+    # save_html(figly, file.path(out_folder, paste0(fixed_name, ".html")))
     
 })

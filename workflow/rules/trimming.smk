@@ -64,7 +64,7 @@ rule parse_fastp:
 
 rule collect_trimming_stats:
     input:
-        report=expand("{sample}/reports/{sample}_trimmed.tsv", sample=samples.index),
+        report=expand("{sample}/trimmed/{sample}_fastp.tsv", sample=samples.index),
     output:
         agg="reports/fastp_stats.tsv",
     message:
