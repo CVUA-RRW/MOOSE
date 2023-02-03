@@ -50,6 +50,8 @@ rule collapse_identical_contigs:
         exec 2> {log}
         vsearch --cluster_fast {input.contigs} --consout {output.contigs} --id {params.id} \
             --strand both -uc {output.table} --fasta_width 0 --xsize
+        #Fix Headers
+        sed -i -E  -e 's/^>centroid=/>/' -e 's/;seqs=[0-9]+$//' {output.contigs}
         """
 
 

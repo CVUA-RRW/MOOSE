@@ -11,7 +11,7 @@ sys.stderr = open(snakemake.log[0], "w")
 import pandas as pd
 
 
-def main(cov, mapping_stats, map):
+def main(cov, mapping_stats, map, rpkm):
     # get total reads
     with open(mapping_stats, 'r') as fi:
         for line in fi:
