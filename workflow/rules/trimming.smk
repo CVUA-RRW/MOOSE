@@ -9,8 +9,8 @@ rule run_fastp:
         r1=lambda wildcards: get_fastq(wildcards, "fq1"),
         r2=lambda wildcards: get_fastq(wildcards, "fq2"),
     output:
-        r1="{sample}/trimmed/{sample}_R1.fastq",
-        r2="{sample}/trimmed/{sample}_R2.fastq",
+        r1=temp("{sample}/trimmed/{sample}_R1.fastq"),
+        r2=temp("{sample}/trimmed/{sample}_R2.fastq"),
         json="{sample}/trimmed/{sample}.json",
         html="{sample}/trimmed/{sample}.html",
     params:
@@ -18,9 +18,6 @@ rule run_fastp:
         qualified_quality_phred=config["qualified_quality_phred"],
         window_size=config["qctrim_window_size"],
         mean_qual=config["qctrim_mean_quality"],
-        umi="--umi" if config['umi'] else "",
-        umi_loc=f"--umi_loc {config['umi_loc']}" if config['umi'] else "",
-        umi_len=f"--umi_len {config['umi_len']}"if config['umi'] else "",
     threads: config["threads_sample"]
     message:
         "[{wildcards.sample}] quality trimming with FASTP"
@@ -38,10 +35,8 @@ rule run_fastp:
             --cut_by_quality3 \
             --cut_window_size {params.window_size} \
             --cut_mean_quality {params.mean_qual} \
-            --detect_adapter_for_pe \
             --thread {threads} \
             --report_title 'Sample {wildcards.sample}' \
-            {params.umi} {params.umi_loc} {params.umi_len} \
         > {log} 2>&1
         """
 
@@ -51,7 +46,9 @@ rule parse_fastp:
         json="{sample}/trimmed/{sample}.json",
         html="{sample}/trimmed/{sample}.html",
     output:
-        tsv=temp("{sample}/trimmed/{sample}_fastp.tsv"),
+        tsv=temp("{sample}/reports/{sample}_fastp.tsv"),
+    params:
+        sample=lambda w: w.sample,
     message:
         "[{wildcards.sample}] parsing FASTP json report"
     conda:
@@ -64,7 +61,7 @@ rule parse_fastp:
 
 rule collect_trimming_stats:
     input:
-        report=expand("{sample}/trimmed/{sample}_fastp.tsv", sample=samples.index),
+        report=expand("{sample}/reports/{sample}_fastp.tsv", sample=samples.index),
     output:
         agg="reports/fastp_stats.tsv",
     message:

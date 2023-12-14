@@ -18,7 +18,7 @@ library(htmltools)
 # Get snakemake parameters
 coverage <- snakemake@input[['coverage']]
 elements <- snakemake@input[['elements']]
-events <- snakemake@input[['events']]
+# events <- snakemake@input[['events']]
 out_folder <- snakemake@output[['plot_dir']]
 # out_html <- snakemake@output[['html']]
 sample_name <- snakemake@params[['sample']]
@@ -309,7 +309,7 @@ figure_no_blast <- function(.x, contig_lengths, covdepth) {
 covdepth <- 
     read_tsv(
         coverage, 
-        col_names=c('contig_id', 'pos', 'depth'),
+        col_names=c('contig_id', 'pos', 'depth', 'mapq'),
         col_types="fii",
         skip=1
     )
@@ -323,11 +323,12 @@ contig_lengths <-
     rename(contig_length=pos)
 
 
-blast <- 
-    bind_rows(
-        parse_blast(elements), 
-        parse_blast(events)
-    )
+# blast <- 
+    # bind_rows(
+        # parse_blast(elements), 
+        # parse_blast(events)
+    # )
+blast <- parse_blast(elements)
 
 
 contigs <- 

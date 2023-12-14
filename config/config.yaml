@@ -1,32 +1,42 @@
-workdir: /home/debian/NGS/dev/GMO/test
-samples: /home/debian/NGS/dev/GMO/fastq/samples.tsv
-threads_sample: 8 # quite critical for mapping. RAM footprint is big (30Gb per sample?) so maximize CPU usage by making one sample at a time. 
+workdir: /home/debian/NGS/dev/GMO/GVO_part2/results_RRWOWL
+samples: /home/debian/NGS/dev/GMO/GVO_part2/fastq_RRWOWL/samples.tsv
+threads_sample: 2
 
 # genomes: /home/debian/NGS/dev/GMO/references/genomes.tsv (BWA indexed)
 indexed_ref: /home/debian/NGS/dev/GMO/references/merged_refs.fa
-# panel fasta file
-panel: /home/debian/NGS/dev/GMO/panel/gmo_feed_panel_v2_ongoing.fa
+# template sequences for assembly
+assembly_template: /home/debian/NGS/dev/GMO/panel/Nexplorer_GMOFeedPanel_V2.fa
+# elements fasta
+elements_detection: /home/debian/NGS/dev/GMO/panel/reduced_screening_elements.fasta
 # event specific sequences as fasta
 event_detection: /home/debian/NGS/dev/GMO/event_detection/event_detection_soja.fa
 
 # Trimming parameters
 read_length_required: 50
-qualified_quality_phred: 15
+qualified_quality_phred: 20
 qctrim_window_size: 4
 qctrim_mean_quality: 30
-
-# UMI/MBC detection (Agilent only)
-umi: True
-umi_loc: per_read 
-umi_len: 3
 
 # Mapping parameters (host)
 
 # Assembly parameters (SAUTE)
-assembly_kmer_min_count: 1 # Default=2
+assembly_kmer_min_count: 2 # Default=2
 assembly_noise_to_signal: 0.05 # Default=0.05
-assembly_identity_collapse: 0.9
+assembly_sec_kmer_threshold: 1 # default 1
+assembly_target_coverage: 0.5 # default 0.5
 
-# BLAST parameters
+# Contigs QC filtering
+# Identity clustering of contigs - 1.0 to collapse only perfectly identical contigs
+assembly_identity_collapse: 0.95 
+# minimal contig length - 0 to skip
+contig_min_length: 600
+# minimal contig coverage depth - 0 to skip
+contig_min_depth: 10
 
-# Mapping parameters (contigs)
+# BLAST parameters (elements)
+blast_evalue: 1000
+blast_identity: 60
+blast_coverage: 40
+
+# Mapping parameters (contigs) - Should be kept at 0 to keep mutliple mapped reads
+mean_mapQ: 0

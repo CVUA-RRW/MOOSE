@@ -14,12 +14,13 @@ import csv
 import pandas as pd
 
 
-def main(injson, inhtml, outtsv):
+def main(injson, inhtml, outtsv, sample):
     with open(injson, "r") as handle:
         data = json.load(handle)
         link_path = os.path.join("..", inhtml)
-        header = "Total reads before quality trim\tTotal bases before quality trim\tTotal reads after quality trim\tTotal bases after quality trim\tQ20 rate after\tQ30 rate after\tDuplication rate\tInsert size peak\tlink_to_report"
+        header = "Sample\tTotal reads before quality trim\tTotal bases before quality trim\tTotal reads after quality trim\tTotal bases after quality trim\tQ20 rate after\tQ30 rate after\tDuplication rate\tInsert size peak\tlink_to_report"
         datalist = [
+            sample,
             data["summary"]["before_filtering"]["total_reads"],
             data["summary"]["before_filtering"]["total_bases"],
             data["summary"]["after_filtering"]["total_reads"],
@@ -39,4 +40,6 @@ def main(injson, inhtml, outtsv):
 if __name__ == '__main__':
     main(snakemake.input['json'],
          snakemake.input['html'],
-         snakemake.output['tsv'])
+         snakemake.output['tsv'],
+         snakemake.params['sample']
+    )
